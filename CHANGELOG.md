@@ -21,8 +21,12 @@
 - Add a new option `periodDuplicateButton`
 
 **New features** 
-Options to hide/show autoScroll, Single day Schedule, hide/show time on grid added
-Scheduler supports Touch screens now
+- Added support for touch screen
+- Added 3 options
+  - singleDaySchedule: false, // true will allow only single-day schedule (e.g. a particular holiday might have some open hours for some business)
+  - autoScroll: true, // false will display full scheduler without scroll
+  - showTimeInGrid: true // false will hide time on table grid
+- Some css fix to fit the scheduler in mobile view (it's not responsive)
 
 **Other changes**
 - Source code cleaning

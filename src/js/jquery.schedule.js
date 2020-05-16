@@ -23,7 +23,7 @@
       periodRemoveButton: 'Remove',
       periodDuplicateButton: 'Duplicate',
       periodTitlePlaceholder: 'Title',
-      days: [
+      daysList: [
         'Mon',
         'Tue',
         'Wed',
@@ -256,7 +256,7 @@
       }
 
       for (var k = 0; k < weekdays; k++) {
-	  var day = (this.settings.singleDaySchedule) ? '' : this.settings.days[k];
+	  var day = (this.settings.singleDaySchedule) ? '' : this.settings.daysList[k];
 	  var singleDayClass = (this.settings.singleDaySchedule) ? 'jqs-grid-single-day' : '';
 	  $('<div class="jqs-grid-day ' + singleDayClass + '">' + day + dayRemove + dayDuplicate + '</div>').
 	  appendTo($('.jqs-grid-head', this.element));
