@@ -1,7 +1,8 @@
 /**
- * jQuery Schedule v2.2.0
- * https://github.com/Yehzuna/jquery-schedule
- * Thomas BORUSZEWSKI <yehzuna@outlook.com>
+ * jQuery Schedule v2.1.0
+ * https://github.com/nileshgamit/jquery-schedule.git
+ * Original Developer: Thomas BORUSZEWSKI <yehzuna@outlook.com>
+ * Touch Support and Few options added - Developer: Nilesh Gamit <nilesh.gamit@gmail.com>
  */
 ;(function ($, window, document, undefined) {
   'use strict';
@@ -22,20 +23,23 @@
       periodRemoveButton: 'Remove',
       periodDuplicateButton: 'Duplicate',
       periodTitlePlaceholder: 'Title',
-      daysList: [
-        'Monday',
-        'Tuesday',
-        'Wednesday',
-        'Thursday',
-        'Friday',
-        'Saturday',
-        'Sunday'
+      days: [
+        'Mon',
+        'Tue',
+        'Wed',
+        'Thu',
+        'Fri',
+        'Sat',
+        'Sun'
       ],
       onInit: function () {},
       onAddPeriod: function () {},
       onRemovePeriod: function () {},
       onDuplicatePeriod: function () {},
-      onClickPeriod: function () {}
+      onClickPeriod: function () {},
+      singleDaySchedule: false,
+      autoScroll: true,
+      showTimeInGrid: true
     },
     pluginName = 'jqs';
 
@@ -112,16 +116,20 @@
       this.periodHeight = 24 * this.periodInterval;
       this.periodPosition = 40 / this.periodInterval;
 
-      $(this.element).addClass('jqs').addClass('jqs-mode-' + this.settings.mode)
-        .addClass('jqs').addClass('jqs-mode-' + this.settings.days);
+      $(this.element).addClass('jqs').addClass('jqs-mode-' + this.settings.mode);
+      
+      if(!this.settings.autoScroll) {
+	  $(this.element).addClass('jqs-no-scroll');
+      }
 
       // Init events
       if (this.settings.mode === 'edit') {
         var position = 0;
         var helper = false;
 
-        $(this.element).on('mousedown', '.jqs-day', function (event) {
-          var offset = event.pageY - $(this).offset().top;
+        $(this.element).on('mousedown touchstart', '.jqs-day', function (event) {
+            
+          var offset = $this.getY(event, false) - $(this).offset().top;
           position = Math.floor(offset / $this.periodPosition);
 
           if (!$(event.target).hasClass('jqs-period') && $(event.target).parents('.jqs-period').length === 0) {
@@ -139,9 +147,10 @@
           }
         });
 
-        $(this.element).on('mousemove', '.jqs-day', function (event) {
+        $(this.element).on('mousemove touchmove', '.jqs-day', function (event) {
           if (helper) {
-            var offset = event.pageY - $(this).offset().top;
+
+            var offset = $this.getY(event, true) - $(this).offset().top;
             var height = Math.round(offset / $this.periodPosition) - position;
             if (height <= 0) {
               height = 1;
@@ -159,9 +168,10 @@
           }
         });
 
-        $(this.element).on('mouseup', '.jqs-day', function (event) {
+        $(this.element).on('mouseup touchend', '.jqs-day', function (event) {
           if (!$(event.target).hasClass('jqs-period') && $(event.target).parents('.jqs-period').length === 0) {
-            var offset = event.pageY - $(this).offset().top;
+
+            var offset = $this.getY(event, false) - $(this).offset().top;
             var height = Math.round(offset / $this.periodPosition) - position;
             if (height <= 0) {
               height = 1;
@@ -177,12 +187,12 @@
           }
         });
 
-        $(this.element).on('mouseenter', '.jqs-day', function () {
+        $(this.element).on('mouseenter touchenter', '.jqs-day', function () {
           var index = $(this).parents('td').index();
           $('.jqs-grid-day', $this.element).eq(index).addClass('jqs-grid-day-buttons');
         });
 
-        $(this.element).on('mouseleave', '.jqs-day', function () {
+        $(this.element).on('mouseleave touchleave', '.jqs-day', function () {
           var index = $(this).parents('td').index();
           $('.jqs-grid-day', $this.element).eq(index).removeClass('jqs-grid-day-buttons');
         });
@@ -223,7 +233,9 @@
 
       $('<table class="jqs-table"><tr></tr></table>').appendTo($(this.element));
 
-      for (var i = 0; i < this.settings.days; i++) {
+      var weekdays = (this.settings.singleDaySchedule) ? 1 : this.settings.days;
+      
+      for (var i = 0; i < weekdays; i++) {
         $('<td><div class="jqs-day"></div></td>').
           appendTo($('.jqs-table tr', this.element));
       }
@@ -238,14 +250,16 @@
       var dayRemove = '';
       var dayDuplicate = '';
       if (this.settings.mode === 'edit') {
-        dayRemove = '<div class="jqs-day-remove" title="' + this.settings.periodRemoveButton + '"></div>';
-        dayDuplicate = '<div class="jqs-day-duplicate" title="' + this.settings.periodDuplicateButton +
-          '"></div>';
+	var singleDayClass = (this.settings.singleDaySchedule) ? 'jqs-single-day-remove' : '';
+        dayRemove = '<div class="jqs-day-remove ' + singleDayClass + '" title="' + this.settings.periodRemoveButton + '"></div>';
+        dayDuplicate = (this.settings.singleDaySchedule) ? '' : '<div class="jqs-day-duplicate" title="' + this.settings.periodDuplicateButton + '"></div>';
       }
 
-      for (var k = 0; k < this.settings.days; k++) {
-        $('<div class="jqs-grid-day">' + this.settings.daysList[k] + dayRemove + dayDuplicate + '</div>').
-          appendTo($('.jqs-grid-head', this.element));
+      for (var k = 0; k < weekdays; k++) {
+	  var day = (this.settings.singleDaySchedule) ? '' : this.settings.days[k];
+	  var singleDayClass = (this.settings.singleDaySchedule) ? 'jqs-grid-single-day' : '';
+	  $('<div class="jqs-grid-day ' + singleDayClass + '">' + day + dayRemove + dayDuplicate + '</div>').
+	  appendTo($('.jqs-grid-head', this.element));
       }
     },
 
@@ -303,12 +317,15 @@
       var periodDuplicate = '';
       if (this.settings.mode === 'edit') {
         periodRemove = '<div class="jqs-period-remove" title="' + this.settings.periodRemoveButton + '"></div>';
-        periodDuplicate = '<div class="jqs-period-duplicate" title="' + this.settings.periodDuplicateButton +
-          '"></div>';
+        periodDuplicate = (this.settings.singleDaySchedule) ? '' : '<div class="jqs-period-duplicate" title="' + this.settings.periodDuplicateButton + '"></div>';
       }
 
       var periodTitle = '<div class="jqs-period-title">' + options.title + '</div>';
-      var periodTime = '<div class="jqs-period-time">' + this.periodInit(position, position + height) + '</div>';
+      var periodTime = '';
+      if(this.settings.showTimeInGrid) {
+	  periodTime = '<div class="jqs-period-time">' + this.periodInit(position, position + height) + '</div>';
+      }
+      
       var period = $('<div class="jqs-period">' +
         '<div class="jqs-period-container">' + periodTime + periodTitle + periodRemove + periodDuplicate + '</div>' +
         '</div>').css({
@@ -463,10 +480,12 @@
         top = maxHeight;
       }
 
-      var maxWidth = $(this.element).width() - 290;
+      // var maxWidth = $(this.element).width() - 290;
+      var maxWidth = $(this.element).width() - 190;
       var left = period.offset().left - $(this.element).offset().left + period.width() + 20;
       if (left > maxWidth) {
-        left = left - 330 - period.width();
+	  // left = left - 330 - period.width();
+	  left = left - 120 - period.width();
       }
 
       // time
@@ -630,16 +649,16 @@
 
       if (this.settings.hour === 12) {
         var time = hour;
-        var ind = '';
+        var ind = ' am';
 
         if (hour >= 12) {
-          ind = 'p';
+          ind = ' pm';
         }
         if (hour > 12) {
           time = hour - 12;
         }
         if (hour === 0 || hour === 24) {
-          ind = '';
+          ind = ' am';
           time = 12;
         }
         if (mn !== 0) {
@@ -715,16 +734,16 @@
         switch (hour) {
           case 0:
           case 24:
-            hour = '12am';
+            hour = '12 am';
             break;
           case 12:
-            hour = '12pm';
+            hour = '12 pm';
             break;
           default:
             if (hour > 12) {
-              hour = (hour - 12) + 'pm';
+              hour = (hour - 12) + ' pm';
             } else {
-              hour += 'am';
+              hour += ' am';
             }
         }
       } else {
@@ -853,6 +872,24 @@
      */
     reset: function () {
       this.removeAll(this.element);
+    },
+    
+    /**
+     * Touch - getY
+     */
+    getY: function (event, preventDefault) {
+        var touch = undefined;
+        if(event.originalEvent.touches) { 
+            if(preventDefault) {
+        	event.preventDefault(); 
+            }
+            touch = event.changedTouches[0]; 
+        }
+          
+        var pageY = event.pageY;
+        if(typeof touch !== 'undefined') { pageY = touch.pageY; }
+        
+        return pageY;
     }
   });
 

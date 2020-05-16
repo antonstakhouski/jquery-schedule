@@ -20,6 +20,10 @@
 - Add a new callback `onDuplicatePeriod`
 - Add a new option `periodDuplicateButton`
 
+**New features** 
+Options to hide/show autoScroll, Single day Schedule, hide/show time on grid added
+Scheduler supports Touch screens now
+
 **Other changes**
 - Source code cleaning
 - Hover effect lighten for buttons in the popup
