@@ -32,14 +32,15 @@
         'Sat',
         'Sun'
       ],
+      hideScroll: false, // true will display full scheduler without scroll
+      hideDayHeading: false, // true will hide day heading
+      hidePeriodOnGrid: false, // true will hide period on grid 
+      hideDuplicatePeriodIcon: false, // true will hide duplicate period icon 
       onInit: function () {},
       onAddPeriod: function () {},
       onRemovePeriod: function () {},
       onDuplicatePeriod: function () {},
-      onClickPeriod: function () {},
-      singleDaySchedule: false,
-      autoScroll: true,
-      showTimeInGrid: true
+      onClickPeriod: function () {}
     },
     pluginName = 'jqs';
 
@@ -233,9 +234,7 @@
 
       $('<table class="jqs-table"><tr></tr></table>').appendTo($(this.element));
 
-      var weekdays = (this.settings.singleDaySchedule) ? 1 : this.settings.days;
-      
-      for (var i = 0; i < weekdays; i++) {
+      for (var i = 0; i < this.settings.days; i++) {
         $('<td><div class="jqs-day"></div></td>').
           appendTo($('.jqs-table tr', this.element));
       }
@@ -250,15 +249,16 @@
       var dayRemove = '';
       var dayDuplicate = '';
       if (this.settings.mode === 'edit') {
-	var singleDayClass = (this.settings.singleDaySchedule) ? 'jqs-single-day-remove' : '';
-        dayRemove = '<div class="jqs-day-remove ' + singleDayClass + '" title="' + this.settings.periodRemoveButton + '"></div>';
-        dayDuplicate = (this.settings.singleDaySchedule) ? '' : '<div class="jqs-day-duplicate" title="' + this.settings.periodDuplicateButton + '"></div>';
+	var dayRemoveClass = (this.settings.days == 1) ? 'jqs-single-day-remove' : '';
+        dayRemove = '<div class="jqs-day-remove ' + dayRemoveClass + '" title="' + this.settings.periodRemoveButton + '"></div>';
+        if(!this.settings.hideDuplicatePeriodIcon) {
+            dayDuplicate = (this.settings.day == 1) ? '' : '<div class="jqs-day-duplicate" title="' + this.settings.periodDuplicateButton + '"></div>';
+        }
       }
 
-      for (var k = 0; k < weekdays; k++) {
-	  var day = (this.settings.singleDaySchedule) ? '' : this.settings.daysList[k];
-	  var singleDayClass = (this.settings.singleDaySchedule) ? 'jqs-grid-single-day' : '';
-	  $('<div class="jqs-grid-day ' + singleDayClass + '">' + day + dayRemove + dayDuplicate + '</div>').
+      for (var k = 0; k < this.settings.days; k++) {
+	  var day = (this.settings.hideDayHeading) ? '' : this.settings.daysList[k];
+	  $('<div class="jqs-grid-day">' + day + dayRemove + dayDuplicate + '</div>').
 	  appendTo($('.jqs-grid-head', this.element));
       }
     },
@@ -317,12 +317,14 @@
       var periodDuplicate = '';
       if (this.settings.mode === 'edit') {
         periodRemove = '<div class="jqs-period-remove" title="' + this.settings.periodRemoveButton + '"></div>';
-        periodDuplicate = (this.settings.singleDaySchedule) ? '' : '<div class="jqs-period-duplicate" title="' + this.settings.periodDuplicateButton + '"></div>';
+        if(!this.settings.hideDuplicatePeriodIcon) {
+            periodDuplicate = (this.settings.days == 1) ? '' : '<div class="jqs-period-duplicate" title="' + this.settings.periodDuplicateButton + '"></div>';
+  	}
       }
 
       var periodTitle = '<div class="jqs-period-title">' + options.title + '</div>';
       var periodTime = '';
-      if(this.settings.showTimeInGrid) {
+      if(!this.settings.hidePeriodOnGrid) {
 	  periodTime = '<div class="jqs-period-time">' + this.periodInit(position, position + height) + '</div>';
       }
       

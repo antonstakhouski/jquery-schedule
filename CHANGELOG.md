@@ -21,11 +21,12 @@
 - Add a new option `periodDuplicateButton`
 
 **New features** 
-- Added support for touch screen
-- Added 3 options
-  - singleDaySchedule: false, // true will allow only single-day schedule (e.g. a particular holiday might have some open hours for some business)
-  - autoScroll: true, // false will display full scheduler without scroll
-  - showTimeInGrid: true // false will hide time on table grid
+- Added support for touch screen (+ draggable & resizable timeslots)
+- Added 4 new options
+      hideScroll: false, // true will display full scheduler without scroll
+      hideDayHeading: false, // true will hide day heading
+      hidePeriodOnGrid: false, // true will hide period on grid 
+      hideDuplicatePeriodIcon: false, // true will hide duplicate period icon 
 - Some css fix to fit the scheduler in mobile view (it's not responsive)
 
 **Other changes**
